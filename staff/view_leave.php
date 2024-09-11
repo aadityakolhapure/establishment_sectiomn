@@ -88,7 +88,7 @@
 						else {
 						
 						$lid=intval($_GET['edit']);
-						$sql = "SELECT tblleaves.id as lid,tblemployees.FirstName,tblemployees.LastName,tblemployees.emp_id,tblemployees.Gender,tblemployees.Phonenumber,tblemployees.EmailId,tblemployees.Av_leave,tblleaves.LeaveType,tblleaves.ToDate,tblleaves.FromDate,tblleaves.Description,tblleaves.PostingDate,tblleaves.Status,tblleaves.AdminRemark,tblleaves.admin_status,tblleaves.registra_remarks,tblleaves.AdminRemarkDate,tblleaves.num_days from tblleaves join tblemployees on tblleaves.empid=tblemployees.emp_id where tblleaves.id=:lid";
+						$sql = "SELECT tblleaves.id as lid,tblemployees.FirstName,tblemployees.LastName,tblemployees.emp_id,tblemployees.Gender,tblemployees.Phonenumber,tblemployees.EmailId,tblemployees.Av_leave,tblleaves.LeaveType,tblleaves.ToDate,tblleaves.FromDate,tblleaves.Description,tblleaves.PostingDate,tblleaves.Status,tblleaves.AdminRemark,tblleaves.admin_status,tblleaves.registra_remarks,tblleaves.AdminRemarkDate,tblleaves.principal_status,tblleaves.num_days from tblleaves join tblemployees on tblleaves.empid=tblemployees.emp_id where tblleaves.id=:lid";
 						$query = $dbh -> prepare($sql);
 						$query->bindParam(':lid',$lid,PDO::PARAM_STR);
 						$query->execute();
@@ -219,8 +219,25 @@
 
 							<div class="col-md-4">
 								<div class="form-group">
-									<label style="font-size:16px;"><b>Registra/Registry Status</b></label>
+									<label style="font-size:16px;"><b>Admin Status</b></label>
 									<?php $stats=$result->admin_status;?>
+									<?php
+									if ($stats==1): ?>
+									  <input type="text" style="color: green;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Approved"; ?>">
+									<?php
+									 elseif ($stats==2): ?>
+									  <input type="text" style="color: red; font-size: 16px;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Rejected"; ?>">
+									  <?php
+									else: ?>
+									  <input type="text" style="color: blue;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Pending"; ?>">
+									<?php endif ?>
+								</div>
+							</div>
+
+							<div class="col-md-4">
+								<div class="form-group">
+									<label style="font-size:16px;"><b>Principal Status</b></label>
+									<?php $stats=$result->principal_status;?>
 									<?php
 									if ($stats==1): ?>
 									  <input type="text" style="color: green;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Approved"; ?>">

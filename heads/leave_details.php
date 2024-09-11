@@ -29,7 +29,7 @@ if (isset($_POST['update'])) {
 	$admremarkdate = date('Y-m-d G:i:s ', strtotime("now"));
 
 	if ($status === '2') {
-		$result = mysqli_query($conn, "update tblleaves, tblemployees set tblleaves.AdminRemark='$description',tblleaves.Status='$status',tblleaves.AdminRemarkDate='$admremarkdate', tblleaves.registra_remarks = '$reg_remarks', tblleaves.admin_status = '$reg_status' where tblleaves.empid = tblemployees.emp_id AND tblleaves.id='$did'");
+		$result = mysqli_query($conn, "update tblleaves, tblemployees set tblleaves.AdminRemark='$description',tblleaves.Status='$status',tblleaves.AdminRemarkDate='$admremarkdate', tblleaves.registra_remarks = '$reg_remarks', tblleaves.admin_status = '$reg_status',tblleaves.principal_status = '$reg_status' where tblleaves.empid = tblemployees.emp_id AND tblleaves.id='$did'");
 
 		if ($result) {
 			echo "<script>alert('Leave updated Successfully');</script>";
