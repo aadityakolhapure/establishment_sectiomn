@@ -138,7 +138,8 @@ if (isset($_GET['delete'])) {
 								<th>DATE TO</th>
 								<th>NO. OF DAYS</th>
 								<th>HOD STATUS</th>
-								<th>REG. STATUS</th>
+								<!-- <th>ADMIN STATUS</th> -->
+								<th>PRINCIPAL STATUS</th>
 								<th class="datatable-nosort">ACTION</th>
 							</tr>
 						</thead>
@@ -171,7 +172,20 @@ if (isset($_GET['delete'])) {
 											<?php } ?>
 
 										</td>
-										<td><?php $stats = $result->admin_status;
+										<!-- <td><?php $stats = $result->admin_status;
+											if ($stats == 1) {
+											?>
+												<span style="color: green">Approved</span>
+											<?php }
+											if ($stats == 2) { ?>
+												<span style="color: red">Not Approved</span>
+											<?php }
+											if ($stats == 0) { ?>
+												<span style="color: blue">Pending</span>
+											<?php } ?>
+
+										</td> -->
+										<td><?php $stats = $result->principal_status;
 											if ($stats == 1) {
 											?>
 												<span style="color: green">Approved</span>

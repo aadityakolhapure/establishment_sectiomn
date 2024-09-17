@@ -1,8 +1,15 @@
-<?php error_reporting(0); ?>
 <?php include('includes_hod/header.php') ?>
 <?php include('../includes/session.php') ?>
 
 <?php
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+//Load Composer's autoloader
+require '../vendor/autoload.php';
+
 // code for update the read notification status
 $isread = 1;
 $did = intval($_GET['leaveid']);
@@ -22,14 +29,41 @@ if (isset($_POST['update'])) {
 	$av_leave = $_POST['av_leave'];
 	$num_days = $_POST['num_days'];
 
+
+	// Fetch leave history
+	$sql = "SELECT * FROM tblleaves WHERE empid = (SELECT empid FROM tblleaves WHERE id = :did)";
+	$query = $dbh->prepare($sql);
+	$query->bindParam(':did', $did, PDO::PARAM_STR);
+	$query->execute();
+	$leaveHistory = $query->fetchAll(PDO::FETCH_OBJ);
+
+	// Format leave history
+	$leaveHistoryContent = "";
+	foreach ($leaveHistory as $leave) {
+		$leaveHistoryContent .= "Leave Type: " . htmlentities($leave->LeaveType) . "\n";
+		$leaveHistoryContent .= "From: " . htmlentities($leave->FromDate) . " To: " . htmlentities($leave->ToDate) . "\n";
+		$leaveHistoryContent .= "Description: " . htmlentities($leave->Description) . "\n";
+	}
+
+	$adminQuery = mysqli_query($conn, "SELECT EmailId FROM tblemployees WHERE Role = 'Admin'");
+	$adminRow = mysqli_fetch_assoc($adminQuery);
+	$adminEmail = $adminRow['EmailId'];
+
+	$sql = "SELECT FirstName, LastName FROM tblemployees WHERE emp_id = (SELECT empid FROM tblleaves WHERE id = :did)";
+	$query = $dbh->prepare($sql);
+	$query->bindParam(':did', $did, PDO::PARAM_STR);
+	$query->execute();
+	$employeeResult = $query->fetch(PDO::FETCH_ASSOC);
+	$employeeName = $employeeResult['FirstName'] . ' ' . $employeeResult['LastName'];
+
 	// $REMLEAVE = $av_leave - $num_days;
-	$reg_remarks = 'Leave was Rejected. Registra/Registry will not see it';
+	$reg_remarks = 'Leave was Rejected. Admin will not see it';
 	$reg_status = 2;
 	date_default_timezone_set('Asia/Kolkata');
 	$admremarkdate = date('Y-m-d G:i:s ', strtotime("now"));
 
 	if ($status === '2') {
-		$result = mysqli_query($conn, "update tblleaves, tblemployees set tblleaves.AdminRemark='$description',tblleaves.Status='$status',tblleaves.AdminRemarkDate='$admremarkdate', tblleaves.registra_remarks = '$reg_remarks', tblleaves.admin_status = '$reg_status',tblleaves.principal_status = '$reg_status' where tblleaves.empid = tblemployees.emp_id AND tblleaves.id='$did'");
+		$result = mysqli_query($conn, "update tblleaves, tblemployees set tblleaves.AdminRemark='$description',tblleaves.Status='$status',tblleaves.AdminRemarkDate='$admremarkdate', tblleaves.registra_remarks = '$reg_remarks', tblleaves.admin_status = '$reg_status', tblleaves.principal_status = '$reg_status' where tblleaves.empid = tblemployees.emp_id AND tblleaves.id='$did'");
 
 		if ($result) {
 			echo "<script>alert('Leave updated Successfully');</script>";
@@ -40,7 +74,37 @@ if (isset($_POST['update'])) {
 		$result = mysqli_query($conn, "update tblleaves, tblemployees set tblleaves.AdminRemark='$description',tblleaves.Status='$status',tblleaves.AdminRemarkDate='$admremarkdate' where tblleaves.empid = tblemployees.emp_id AND tblleaves.id='$did'");
 
 		if ($result) {
-			echo "<script>alert('Leave updated Successfully');</script>";
+			// echo "<script>alert('Leave updated Successfully');</script>";
+
+
+			//Create an instance; passing `true` enables exceptions
+			$mail = new PHPMailer(true);
+
+			//Server settings
+			$mail->SMTPDebug = SMTP::DEBUG_SERVER;
+			$mail->SMTPDebug = 0; //Enable verbose debug output
+			$mail->isSMTP(); //Send using SMTP
+			$mail->Host = 'smtp.gmail.com'; //Set the SMTP server to send through
+			$mail->SMTPAuth = true; //Enable SMTP authentication
+			$mail->Username = 'aadityakolhapure28@gmail.com'; //SMTP username
+			$mail->Password = 'rsyiovsdcybbxmjy'; //SMTP password  
+			$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; //Enable implicit TLS encryption
+			$mail->Port = 465; //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+
+			//Recipients
+			$mail->setFrom('aadityakolhapure28@gmail.com', 'Leave Management System');
+			$mail->addAddress($adminEmail, 'Admin'); //Add HOD's email as recipient
+			$mail->addReplyTo('aadityakolhapure28@gmail.com', 'Leave Management System');
+
+			//Content
+			$mail->isHTML(true); //Set email format to HTML
+			$mail->Subject = 'Leave Application Notification';
+			$mail->Body = "A leave application has been recommended by the HOD for " . $employeeName . ". Please review it.\n\nLeave History:\n" . $leaveHistoryContent;
+			if ($mail->send()) {
+				echo "<script>alert('Leave Application was successful. Email sent to Admin.');</script>";
+			} else {
+				echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+			}
 		} else {
 			die(mysqli_error());
 		}
@@ -90,9 +154,9 @@ if (isset($_POST['update'])) {
 </style>
 
 <body>
-	<div class="pre-loader">
+	<!-- <div class="pre-loader">
 		<div class="pre-loader-box">
-			<div class="loader-logo"><img src="../vendors/images/deskapp-logo-svg.png" alt=""></div>
+			<div class="loader-logo"><img src="../vendors/images/favicon-32x32.png" alt="" style="height: 100px; width: 100px;"></div>
 			<div class='loader-progress' id="progress_div">
 				<div class='bar' id='bar1'></div>
 			</div>
@@ -101,7 +165,7 @@ if (isset($_POST['update'])) {
 				Loading...
 			</div>
 		</div>
-	</div>
+	</div> -->
 
 	<?php include('includes_hod/navbar.php') ?>
 
@@ -145,7 +209,7 @@ if (isset($_POST['update'])) {
 						} else {
 
 							$lid = intval($_GET['leaveid']);
-							$sql = "SELECT tblleaves.id as lid,tblemployees.FirstName,tblemployees.LastName,tblemployees.emp_id,tblemployees.Gender,tblemployees.Phonenumber,tblemployees.EmailId,tblemployees.Av_leave,tblleaves.LeaveType,tblleaves.ToDate,tblleaves.FromDate,tblleaves.Description,tblleaves.PostingDate,tblleaves.Status,tblleaves.AdminRemark,tblleaves.principal_remark,tblleaves.principal_remark_date,tblleaves.principal_status,tblleaves.PrincipalRemark,tblleaves.admin_status,tblleaves.registra_remarks,tblleaves.AdminRemarkDate,tblleaves.num_days from tblleaves join tblemployees on tblleaves.empid=tblemployees.emp_id where tblleaves.id=:lid";
+							$sql = "SELECT tblleaves.id as lid,tblemployees.FirstName,tblemployees.LastName,tblemployees.emp_id,tblemployees.Gender,tblemployees.Phonenumber,tblemployees.EmailId,tblemployees.Av_leave,tblleaves.LeaveType,tblleaves.ToDate,tblleaves.FromDate,tblleaves.Description,tblleaves.PostingDate,tblleaves.Status,tblleaves.AdminRemark,tblleaves.principal_remark,tblleaves.principal_remark_date,tblleaves.principal_status,tblleaves.PrincipalRemark,tblleaves.admin_status,tblleaves.registra_remarks,tblleaves.AdminRemarkDate,tblleaves.num_days,tblleaves.dateA,tblleaves.existing_loadA,tblleaves.schedule_timeA,tblleaves.classA,tblleaves.alternative_facultyA,tblleaves.date1,tblleaves.existing_load,tblleaves.schedule_time,tblleaves.class,tblleaves.alternative_faculty from tblleaves join tblemployees on tblleaves.empid=tblemployees.emp_id where tblleaves.id=:lid";
 							$query = $dbh->prepare($sql);
 							$query->bindParam(':lid', $lid, PDO::PARAM_STR);
 							$query->execute();
@@ -183,7 +247,7 @@ if (isset($_POST['update'])) {
 										<div class="col-md-4 col-sm-12">
 											<div class="form-group">
 												<label style="font-size:16px;"><b>Leave Type</b></label>
-												<input type="text" class="selectpicker form-control" data-style="btn-outline-info" readonly value="<?php echo htmlentities($result->LeaveType); ?>">
+												<input type="text" class="form-control" data-style="btn-outline-info" readonly value="<?php echo $result->LeaveType; ?>">
 											</div>
 										</div>
 										<div class="col-md-4 col-sm-12">
@@ -212,6 +276,7 @@ if (isset($_POST['update'])) {
 											</div>
 										</div>
 
+
 									</div>
 									<div class="form-group row">
 										<label style="font-size:16px;" class="col-sm-12 col-md-2 col-form-label"><b>Leave Reason</b></label>
@@ -231,13 +296,13 @@ if (isset($_POST['update'])) {
 										</div>
 									</div>
 									<div class="form-group row">
-										<label style="font-size:16px;" class="col-sm-12 col-md-2 col-form-label"><b>Reg. Remarks</b></label>
+										<label style="font-size:16px;" class="col-sm-12 col-md-2 col-form-label"><b>Principal Remark</b></label>
 										<div class="col-sm-12 col-md-10">
 											<?php
-											if ($result->registra_remarks == "") : ?>
+											if ($result->principal_remark == "") : ?>
 												<input type="text" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Waiting for Approval"; ?>">
 											<?php else : ?>
-												<input type="text" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo htmlentities($result->registra_remarks); ?>">
+												<input type="text" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo htmlentities($result->principal_remark); ?>">
 											<?php endif ?>
 										</div>
 									</div>
@@ -246,10 +311,10 @@ if (isset($_POST['update'])) {
 											<div class="form-group">
 												<label style="font-size:16px;"><b>Action Taken Date</b></label>
 												<?php
-												if ($result->AdminRemarkDate == "") : ?>
+												if ($result->principal_remark_date == "") : ?>
 													<input type="text" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "NA"; ?>">
 												<?php else : ?>
-													<input type="text" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo htmlentities($result->AdminRemarkDate); ?>">
+													<input type="text" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo htmlentities($result->principal_remark_date); ?>">
 												<?php endif ?>
 
 											</div>
@@ -260,10 +325,10 @@ if (isset($_POST['update'])) {
 												<?php $stats = $result->Status; ?>
 												<?php
 												if ($stats == 1) : ?>
-													<input type="text" style="color: green;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Approved"; ?>">
+													<input type="text" style="color: green;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Recommended"; ?>">
 												<?php
 												elseif ($stats == 2) : ?>
-													<input type="text" style="color: red; font-size: 16px;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Rejected"; ?>">
+													<input type="text" style="color: red; font-size: 16px;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Not Recommended"; ?>">
 												<?php
 												else : ?>
 													<input type="text" style="color: blue;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Pending"; ?>">
@@ -276,7 +341,7 @@ if (isset($_POST['update'])) {
 												<?php $ad_stats = $result->admin_status; ?>
 												<?php
 												if ($ad_stats == 1) : ?>
-													<input type="text" style="color: green;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Approved"; ?>">
+													<input type="text" style="color: green;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Forwarded"; ?>">
 												<?php
 												elseif ($ad_stats == 2) : ?>
 													<input type="text" style="color: red; font-size: 16px;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Rejected"; ?>">
@@ -288,7 +353,7 @@ if (isset($_POST['update'])) {
 										</div>
 										<div class="col-md-3">
 											<div class="form-group">
-												<label style="font-size:16px;"><b>principal Status</b></label>
+												<label style="font-size:16px;"><b>Principal Status</b></label>
 												<?php $prin_stats = $result->principal_status; ?>
 												<?php
 												if ($prin_stats == 1) : ?>
@@ -301,6 +366,47 @@ if (isset($_POST['update'])) {
 													<input type="text" style="color: blue;" class="selectpicker form-control" data-style="btn-outline-primary" readonly value="<?php echo "Pending"; ?>">
 												<?php endif ?>
 											</div>
+										</div>
+										<div class="row" style="display: flex; flex-direction:column; padding-left: 10px">
+
+											<div class="pd-20">
+												<h2 class="text-blue h4">Load Adjustment</h2>
+											</div>
+											<div class="pb-10">
+												<table class="data-table table">
+													<thead>
+														<tr>
+															<th class="table-plus">Load Date</th>
+															<th>Existing load</th>
+															<th>Schedule Time</th>
+															<th>Class</th>
+															<th>Alternative Faculty</th>
+
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td><?php echo htmlentities($result->dateA); ?></td>
+															<td><?php echo htmlentities($result->existing_loadA); ?></td>
+															<td><?php echo htmlentities($result->schedule_timeA); ?></td>
+															<td><?php echo htmlentities($result->classA); ?></td>
+															<td><?php echo htmlentities($result->alternative_facultyA); ?></td>
+
+														</tr>
+														<tr>
+															<td><?php echo htmlentities($result->date1); ?></td>
+															<td><?php echo htmlentities($result->existing_load); ?></td>
+															<td><?php echo htmlentities($result->schedule_time); ?></td>
+															<td><?php echo htmlentities($result->class); ?></td>
+															<td><?php echo htmlentities($result->alternative_faculty); ?></td>
+
+														</tr>
+
+
+													</tbody>
+												</table>
+											</div>
+
 										</div>
 
 										<?php

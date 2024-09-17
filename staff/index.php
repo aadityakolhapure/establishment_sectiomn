@@ -2,9 +2,8 @@
 <?php include('../includes/session.php') ?>
 
 <body>
-	<div class="pre-loader">
-		<div class="pre-loader-box">
-			<!-- <div class="loader-logo"><img src="../vendors/images/logo_w.png" alt=""></div> -->
+	<div class="pre-loader-box">
+			<div class="loader-logo"><img src="../vendors/images/favicon-32x32.png" alt="" style="height: 100px; width: 100px;"></div>
 			<div class='loader-progress' id="progress_div">
 				<div class='bar' id='bar1'></div>
 			</div>
@@ -13,7 +12,6 @@
 				Loading...
 			</div>
 		</div>
-	</div>
 
 	<?php include('includes/navbar.php') ?>
 
@@ -167,7 +165,8 @@
 								<th>DATE TO</th>
 								<th>NO. OF DAYS</th>
 								<th>HOD STATUS</th>
-								<th>REG. STATUS</th>
+								<th>Admin STATUS</th>
+								<th>Principal STATUS</th>
 								<th class="datatable-nosort">ACTION</th>
 							</tr>
 						</thead>
@@ -201,6 +200,19 @@
 
 										</td>
 										<td><?php $stats = $result->admin_status;
+											if ($stats == 1) {
+											?>
+												<span style="color: green">Approved</span>
+											<?php }
+											if ($stats == 2) { ?>
+												<span style="color: red">Not Approved</span>
+											<?php }
+											if ($stats == 0) { ?>
+												<span style="color: blue">Pending</span>
+											<?php } ?>
+
+										</td>
+										<td><?php $stats = $result->principal_status;
 											if ($stats == 1) {
 											?>
 												<span style="color: green">Approved</span>

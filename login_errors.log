@@ -1,0 +1,57 @@
+[2024-09-11 20:21:53] Login Error: Login attempt for username: pravan@gmail.com
+[2024-09-11 20:21:53] Login Error: User found in database
+[2024-09-11 20:21:53] Login Error: Password verified successfully
+[2024-09-11 20:21:53] Login Error: Redirecting to: heads/index.php
+[2024-09-11 21:13:13] Login Error: Login attempt for username: aadityakolhapure28@gmail.com
+[2024-09-11 21:13:13] Login Error: User found in database
+[2024-09-11 21:13:13] Login Error: Password verified successfully
+[2024-09-11 21:13:13] Login Error: Redirecting to: staff/index.php
+[2024-09-11 21:13:28] Login Error: Login attempt for username: pravan@gmail.com
+[2024-09-11 21:13:28] Login Error: User found in database
+[2024-09-11 21:13:28] Login Error: Password verified successfully
+[2024-09-11 21:13:28] Login Error: Redirecting to: heads/index.php
+[2024-09-11 21:14:07] Login Error: Login attempt for username: aadityakolhapure28@gmail.com
+[2024-09-11 21:14:07] Login Error: User found in database
+[2024-09-11 21:14:07] Login Error: Password verified successfully
+[2024-09-11 21:14:07] Login Error: Redirecting to: staff/index.php
+[2024-09-11 21:28:57] Login Error: Login attempt for username: pravan@gmail.com
+[2024-09-11 21:28:57] Login Error: User found in database
+[2024-09-11 21:28:57] Login Error: Password verified successfully
+[2024-09-11 21:28:57] Login Error: Redirecting to: heads/index.php
+[2024-09-11 21:30:55] Login Error: Login attempt for username: pravan@gmail.com
+[2024-09-11 21:30:55] Login Error: User found in database
+[2024-09-11 21:30:55] Login Error: Password verified successfully
+[2024-09-11 21:30:55] Login Error: Redirecting to: heads/index.php
+[2024-09-11 21:38:36] Login Error: Login attempt for username: sameer@gmail.com
+[2024-09-11 21:38:36] Login Error: No user found with email: sameer@gmail.com
+[2024-09-11 21:39:08] Login Error: Login attempt for username: james@gmail.com
+[2024-09-11 21:39:08] Login Error: User found in database
+[2024-09-11 21:39:08] Login Error: Password verified successfully
+[2024-09-11 21:39:08] Login Error: Redirecting to: admin/admin_dashboard.php
+[2024-09-11 21:49:28] Login Error: Login attempt for username: ron@gmail.com
+[2024-09-11 21:49:28] Login Error: User found in database
+[2024-09-11 21:49:28] Login Error: Password verification failed
+[2024-09-11 21:49:39] Login Error: Login attempt for username: ron@gmail.com
+[2024-09-11 21:49:39] Login Error: User found in database
+[2024-09-11 21:49:39] Login Error: Password verified successfully
+[2024-09-11 21:49:39] Login Error: Redirecting to: principal/index.php
+[2024-09-11 21:51:10] Login Error: Login attempt for username: aadityakolhapure28@gmail.com
+[2024-09-11 21:51:10] Login Error: User found in database
+[2024-09-11 21:51:10] Login Error: Password verified successfully
+[2024-09-11 21:51:10] Login Error: Redirecting to: staff/index.php
+[2024-09-11 21:55:31] Login Error: Login attempt for username: james@gmail.com
+[2024-09-11 21:55:31] Login Error: User found in database
+[2024-09-11 21:55:31] Login Error: Password verified successfully
+[2024-09-11 21:55:31] Login Error: Redirecting to: admin/admin_dashboard.php
+[2024-09-17 16:32:30] Login Error: Login attempt for username: pravan@gmail.com
+[2024-09-17 16:32:30] Login Error: User found in database
+[2024-09-17 16:32:30] Login Error: Password verified successfully
+[2024-09-17 16:32:30] Login Error: Redirecting to: heads/index.php
+[2024-09-17 16:35:01] Login Error: Login attempt for username: pravan@gmail.com
+[2024-09-17 16:35:01] Login Error: User found in database
+[2024-09-17 16:35:01] Login Error: Password verified successfully
+[2024-09-17 16:35:01] Login Error: Redirecting to: heads/index.php
+[2024-09-17 16:35:11] Login Error: Login attempt for username: ron@gmail.com
+[2024-09-17 16:35:11] Login Error: User found in database
+[2024-09-17 16:35:11] Login Error: Password verified successfully
+[2024-09-17 16:35:11] Login Error: Redirecting to: principal/index.php

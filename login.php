@@ -1,40 +1,82 @@
 <?php
 session_start();
 include('includes/config.php');
-if (isset($_POST['signin'])) {
-	$username = $_POST['username'];
-	$password = md5($_POST['password']);
 
-	$sql = "SELECT * FROM tblemployees where EmailId ='$username' AND Password ='$password'";
-	$query = mysqli_query($conn, $sql);
-	$count = mysqli_num_rows($query);
-	if ($count > 0) {
-		while ($row = mysqli_fetch_assoc($query)) {
-			if ($row['role'] == 'Admin') {
-				$_SESSION['alogin'] = $row['emp_id'];
-				$_SESSION['arole'] = $row['Department'];
-				echo "<script type='text/javascript'> document.location = 'admin/admin_dashboard.php'; </script>";
-			} elseif ($row['role'] == 'Staff') {
-				$_SESSION['alogin'] = $row['emp_id'];
-				$_SESSION['arole'] = $row['Department'];
-				echo "<script type='text/javascript'> document.location = 'staff/index.php'; </script>";
-			} elseif ($row['role'] == 'Principal') {
-				$_SESSION['alogin'] = $row['emp_id'];
-				// $_SESSION['arole']=$row['Department'];
-				echo "<script type='text/javascript'> document.location = 'principal/index.php'; </script>";
-			} else {
-				$_SESSION['alogin'] = $row['emp_id'];
-				$_SESSION['arole'] = $row['Department'];
-				echo "<script type='text/javascript'> document.location = 'heads/index.php'; </script>";
-			}
-		}
-	} else {
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-		echo "<script>alert('Invalid Details');</script>";
-	}
+function logError($message) {
+    error_log(date('[Y-m-d H:i:s] ') . "Login Error: " . $message . "\n", 3, 'login_errors.log');
 }
-// $_SESSION['alogin']=$_POST['username'];
-// 	echo "<script type='text/javascript'> document.location = 'changepassword.php'; </script>";
+
+if (isset($_POST['signin'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    logError("Login attempt for username: " . $username);
+
+    if (!$conn) {
+        logError("Database connection failed: " . mysqli_connect_error());
+        die("Database connection failed. Please try again later.");
+    }
+
+    $sql = "SELECT * FROM tblemployees WHERE EmailId = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    
+    if ($stmt === false) {
+        logError("Prepare failed: " . mysqli_error($conn));
+        die("Database error. Please try again later.");
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $username);
+    $execute_result = mysqli_stmt_execute($stmt);
+
+    if ($execute_result === false) {
+        logError("Execute failed: " . mysqli_stmt_error($stmt));
+        die("Database error. Please try again later.");
+    }
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($row = mysqli_fetch_assoc($result)) {
+        logError("User found in database");
+        
+        if (password_verify($password, $row['Password']) || md5($password) === $row['Password']) {
+            logError("Password verified successfully");
+            $_SESSION['alogin'] = $row['emp_id'];
+            $_SESSION['arole'] = $row['Department'];
+
+            $redirect_url = '';
+            switch ($row['role']) {
+                case 'Admin':
+                    $redirect_url = 'admin/admin_dashboard.php';
+                    break;
+                case 'Staff':
+                    $redirect_url = 'staff/index.php';
+                    break;
+                case 'Principal':
+                    $redirect_url = 'principal/index.php';
+                    break;
+                default:
+                    $redirect_url = 'heads/index.php';
+                    break;
+            }
+
+            logError("Redirecting to: " . $redirect_url);
+            echo "<script type='text/javascript'>
+                    window.location.href = '$redirect_url';
+                  </script>";
+            exit();
+        } else {
+            logError("Password verification failed");
+            echo "<script>alert('Invalid password');</script>";
+        }
+    } else {
+        logError("No user found with email: " . $username);
+        echo "<script>alert('Invalid username');</script>";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -72,9 +114,28 @@ if (isset($_POST['signin'])) {
 
 		gtag('config', 'UA-119386393-1');
 	</script>
+	<style>
+		.brand-logo a .svg,
+		.brand-logo a img {
+			max-width: 1800px;
+			display: block;
+			height: auto;
+			margin-left: -23px;
+			margin-top: 13px;
+		}
+	</style>
 </head>
 
 <body class="login-page">
+	<div class="login-header box-shadow" style="height: 85px;">
+		<div class="container-fluid d-flex justify-content-between align-items-center">
+			<div class="brand-logo">
+				<a href="index.php">
+					<img src="vendors/images/login_logo.png" alt="" style="width: 516px; height: 98px">
+				</a>
+			</div>
+		</div>
+	</div>
 	<div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
 		<div class="container">
 			<div class="row align-items-center">
@@ -86,7 +147,7 @@ if (isset($_POST['signin'])) {
 						<div class="login-title">
 							<h2 class="text-center text-primary">Welcome To Establishment Section</h2>
 						</div>
-						<form name="signin" method="post">
+						<form name="signin" method="post" action="login.php">
 
 							<div class="input-group custom">
 								<input type="text" class="form-control form-control-lg" placeholder="Email ID" name="username" id="username">
